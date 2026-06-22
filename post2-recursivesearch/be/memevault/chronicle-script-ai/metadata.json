@@ -1,0 +1,6 @@
+{
+  "name": "Chronicle Script AI",
+  "description": "AI-powered historical script generator for short vertically-oriented videos. Generates scene-by-scene scripts with realistic image prompts in JSON format.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
