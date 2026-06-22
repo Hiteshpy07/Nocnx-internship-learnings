@@ -2,26 +2,23 @@ import React, { use,useEffect, useState } from 'react';
 import axios from 'axios';
 import img from './DuCs6OeXgAElz4V.jpg'
 
-export default function NetflixMinimal() {
+export default function Netflixloadbulk() {
   // Mock array for layout placement (12 simple items)
   
 
   const [data, setData] = useState([]);
   const [bulkdata, setbulkData] = useState([]);
 
-  useEffect(() => {
-    axios.get("http://localhost:8000/")
+   useEffect(() => {
+    axios.get("http://localhost:8000/movies/bulk")
       .then(response => {
-        // console.log('Data fetched from server:', response.data);
-        setData(response.data.Search);
+        setbulkData(response.data);
+        console.log(response.data)
       })
       .catch(error => {
-        console.error('Error fetching data from server:', error);
+        console.error('Error fetching bulk data from server:', error);
       });
-
-   },[])
-
- 
+   }, []);
 
 //    const placeholderCards = Array.from({ length: 12 }, (_, i) => ({
 //     id: i + 1,
@@ -88,7 +85,7 @@ export default function NetflixMinimal() {
 
         {/* Responsive Grid Structure */}
         <div className="grid grid-cols-2  lg:grid-cols-3 gap-4">
-          {data.map((card) => (
+          {bulkdata.map((card) => (
             <div 
               key={card.id} 
               className="group bg-slate-900 border border-slate-800/80 rounded-lg overflow-hidden shadow-md hover:border-slate-700 transition-all cursor-pointer flex flex-col"
