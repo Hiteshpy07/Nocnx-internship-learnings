@@ -8,6 +8,7 @@ import img from './DuCs6OeXgAElz4V.jpg'
 function Netflixloadretro() {
     const [showJioAlert, setShowJioAlert] = useState(false); 
     const [retropdata,setretropdata] = useState([]);
+    const [bulkDataBytes, setBulkDataBytes] = useState(0);
 
 // useEffect(()=>{
 //     axios.get("http://localhost:8000/movies/retro-pagination")
@@ -27,6 +28,10 @@ function Netflixloadretro() {
         .then(response=>{
             console.log("retro pagination data: " + response.data)
             setretropdata(response.data)
+            const sizeInBytes = response.headers['content-length'];
+        if (sizeInBytes) {
+      const bytesNum = parseInt(sizeInBytes, 10);
+      setBulkDataBytes(bytesNum);}
         })
 }
 
@@ -96,7 +101,9 @@ function Netflixloadretro() {
         <div className="h-0.5 bg-red-600 animate-shrink-width" />
       </div>
     )}
-    <div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>part1</div>
+       <div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>
+  <span>data spent:{bulkDataBytes}kb</span>
+</div>
           {/* 🧭 Minimal Navbar */}
           <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-6">

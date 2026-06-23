@@ -8,7 +8,7 @@ export default function NetflixMinimal() {
   const [infiniteHasMore, setInfiniteHasMore] = useState(true);
   const [infiniteDataBytes, setInfiniteDataBytes] = useState(0);
   const [isInfiniteLoading, setIsInfiniteLoading] = useState(false);
-
+const [bulkDataBytes, setBulkDataBytes] = useState(0);
   const bottomObserverRef = useRef(null);
 
   // Core Data Fetch Routine
@@ -27,13 +27,18 @@ export default function NetflixMinimal() {
       }
 
       const data = await res.json();
-      
       if (data.Search && data.Search.length > 0) {
         setInfiniteMovies(prev => [...prev, ...data.Search]);
         setInfinitePage(prev => prev + 1);
       } else {
         setInfiniteHasMore(false);
       }
+ const sizeInBytes = response.headers['content-length'];
+        if (sizeInBytes) {
+      const bytesNum = parseInt(sizeInBytes, 10);
+      setBulkDataBytes(bytesNum);
+        }
+
     } catch (err) {
       console.error("Infinite stream connection dropped:", err);
     } finally {
@@ -76,7 +81,9 @@ export default function NetflixMinimal() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      <div className='h-10 flex gap-2 justify-center text-white font-bold text-lg'>part2</div>
+      <div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>
+  <span>data spent:{bulkDataBytes}kb</span>
+</div>
       
       {/* 🧭 Minimal Navbar */}
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">

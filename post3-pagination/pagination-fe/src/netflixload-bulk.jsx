@@ -109,7 +109,9 @@ export default function Netflixloadbulk() {
     <div className="h-0.5 bg-red-600 animate-shrink-width" />
   </div>
 )}
-<div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>part1</div>
+<div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>
+  <span>data spent:{bulkDataBytes}kb</span>
+</div>
       {/* 🧭 Minimal Navbar */}
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-6">
