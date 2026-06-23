@@ -1,6 +1,7 @@
 import React, { use,useEffect, useState } from 'react';
 import axios from 'axios';
 import img from './DuCs6OeXgAElz4V.jpg'
+import img1 from './1_GettyImages-109703773.jpg'
 
 export default function Netflixloadbulk() {
   // Mock array for layout placement (12 simple items)
@@ -8,10 +9,19 @@ export default function Netflixloadbulk() {
 
   const [data, setData] = useState([]);
   const [bulkdata, setbulkData] = useState([]);
+  const [bulkDataBytes, setBulkDataBytes] = useState(0); 
+  const [showJioAlert, setShowJioAlert] = useState(false);   
 
    useEffect(() => {
     axios.get("http://localhost:8000/movies/bulk")
       .then(response => {
+        const sizeInBytes = response.headers['content-length'];
+        if (sizeInBytes) {
+      const bytesNum = parseInt(sizeInBytes, 10);
+      setBulkDataBytes(bytesNum);
+      if (bytesNum > 15000) {
+        setShowJioAlert(true);
+      }}
         setbulkData(response.data);
         console.log(response.data)
       })
@@ -28,10 +38,78 @@ export default function Netflixloadbulk() {
 //   }));
 
    console.log("Data in component state:", data);
-   console.log(typeof data);
+   console.log(typeof data)
+   console.log(bulkDataBytes)
+
+   const formattedBulkMB = (bulkDataBytes / (1024 * 1024)).toFixed(3);
+   console.log(formattedBulkMB)
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+      {/* <div className="mt-3 bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs flex justify-between items-center">
+    <span className="text-slate-500 font-bold">Bandwidth Expended:</span>
+    <span className="text-red-500 font-black tracking-wide text-sm animate-pulse">
+      {bulkDataBytes} bytes
+    </span>
+  </div> */}
+
+
+
+
+  {/* 🚨 Dynamic Jio Flash Notification Overlay */}
+{showJioAlert && (
+  <div className="fixed top-10 left-6 z-50 w-full max-w-sm bg-slate-900 border border-red-500/40 rounded-xl shadow-[0_0_30px_rgba(239,68,68,0.15)] overflow-hidden font-sans transition-all duration-300 animate-slide-down">
+    
+    {/* Minimalist Top Status Accents */}
+    <div className="bg-gradient-to-r from-red-600 to-rose-600 px-3 py-1.5 flex justify-between items-center">
+      <div className="flex items-center gap-1.5 text-white font-mono tracking-wider font-black text-[10px]">
+        <span className="bg-white text-red-600 px-1.5 py-0.5 rounded text-[9px] uppercase font-sans">Jio</span>
+        NETWORK TRAFFIC WARNING
+      </div>
+      <button 
+        onClick={() => setShowJioAlert(false)} 
+        className="text-white/70 hover:text-white font-mono font-bold text-xs transition-colors px-1"
+      >
+        ✕
+      </button>
+    </div>
+
+    {/* Main Content Row */}
+    <div className="p-4 flex gap-4 items-center bg-slate-900/95">
       
+      {/* 📸 Image Frame Slot on the Left Side */}
+      <div className="w-14 h-14 rounded-lg border border-slate-700 bg-slate-800 overflow-hidden flex-shrink-0 shadow-md flex items-center justify-center relative group">
+        <img 
+          src={img1}  // Make sure you have an image saved at public/ambani.jpg
+          alt="Jio Desk Notification" 
+          className="w-full h-full object-cover grayscale brightness-90 group-hover:grayscale-0 transition-all duration-300"
+          onError={(e) => {
+            // Fallback text if your local image asset is missing during build
+            e.target.style.display = 'none';
+            e.target.parentNode.innerHTML = '<span class="text-[9px] font-mono text-slate-500 font-bold text-center">MUKESH<br/>FACE</span>';
+          }}
+        />
+      </div>
+
+      {/* Message Copy Context Panel */}
+      <div className="flex-1">
+        <h4 className="font-black text-xs text-red-400 tracking-wide uppercase">
+          Data Budget Exceeded!
+        </h4>
+        <p className="text-[11px] text-slate-300 font-medium leading-relaxed mt-1">
+          Attention: <span className="font-extrabold text-slate-100">100% data of daily recharge is over</span> due to heavy bulk unoptimized structural payload looping.
+        </p>
+        <p className="text-[9px] text-slate-500 italic font-mono mt-1.5">
+          "Bhai, pagination implement kar lo next time."
+        </p>
+      </div>
+
+    </div>
+
+    {/* Bottom Status Timer Progress bar Accent simulation */}
+    <div className="h-0.5 bg-red-600 animate-shrink-width" />
+  </div>
+)}
+<div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>part1</div>
       {/* 🧭 Minimal Navbar */}
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-6">

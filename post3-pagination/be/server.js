@@ -4,7 +4,9 @@ const cors=require('cors')
 const app=express();
 const PORT=8000;
 
-app.use(cors());
+app.use(cors({
+    exposedHeaders: ['Content-Length']  
+}));
 
 app.get('/',(req,res)=>{
     axios.get("http://www.omdbapi.com/?i=tt3896198&apikey=bbc0cf70&s=space&type=movie&page=2")
@@ -39,6 +41,22 @@ catch (error) {
   }
 });
 
+
+app.get('/movies/retropagination',async(req,res)=>{
+    const page = req.query.page || 1;
+    axios.get(`http://www.omdbapi.com/?i=tt3896198&apikey=bbc0cf70&s=space&type=movie&page=${page}`)
+    .then(response => {
+        res.json(response.data.Search);
+        console.log(page)
+        console.log(response.data)
+        return response.data.Search
+    })
+    .catch(error => {
+        console.error("Error fetching retro pagination data:", error);
+        res.status(500).json({ error: "Failed to fetch retro pagination data." });
+    });
+}
+)
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 })

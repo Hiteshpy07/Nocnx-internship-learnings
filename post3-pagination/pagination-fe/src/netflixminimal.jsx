@@ -21,7 +21,6 @@ export default function NetflixMinimal() {
 
    },[])
 
- 
 
 //    const placeholderCards = Array.from({ length: 12 }, (_, i) => ({
 //     id: i + 1,
@@ -34,7 +33,7 @@ export default function NetflixMinimal() {
    console.log(typeof data);
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      
+      <div className='h-10 flex gap-2 justify-center text-white font-bold text-lg'>part2</div>
       {/* 🧭 Minimal Navbar */}
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-6">
