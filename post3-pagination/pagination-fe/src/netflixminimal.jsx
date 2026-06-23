@@ -1,47 +1,89 @@
-import React, { use,useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import img from './DuCs6OeXgAElz4V.jpg'
+import img from './DuCs6OeXgAElz4V.jpg';
 
 export default function NetflixMinimal() {
-  // Mock array for layout placement (12 simple items)
-  
+  const [infiniteMovies, setInfiniteMovies] = useState([]);
+  const [infinitePage, setInfinitePage] = useState(1);
+  const [infiniteHasMore, setInfiniteHasMore] = useState(true);
+  const [infiniteDataBytes, setInfiniteDataBytes] = useState(0);
+  const [isInfiniteLoading, setIsInfiniteLoading] = useState(false);
 
-  const [data, setData] = useState([]);
-  const [bulkdata, setbulkData] = useState([]);
+  const bottomObserverRef = useRef(null);
 
-  useEffect(() => {
-    axios.get("http://localhost:8000/")
-      .then(response => {
-        // console.log('Data fetched from server:', response.data);
-        setData(response.data.Search);
-      })
-      .catch(error => {
-        console.error('Error fetching data from server:', error);
-      });
-
-   },[])
-
-
-//    const placeholderCards = Array.from({ length: 12 }, (_, i) => ({
-//     id: i + 1,
-//     title: data ? data.Title : `Movie Title ${i + 1}`,
-//     poster: data ? data.Poster : `https://via.placeholder.com/300x450?text=Poster+${i + 1}`,
+  // Core Data Fetch Routine
+  const handleInfiniteFetch = async () => {
+    if (isInfiniteLoading || !infiniteHasMore) return;
     
-//   }));
+    setIsInfiniteLoading(true);
+    const API_KEY = "bbc0cf70"; // Your active OMDb key
+    
+    try {
+      const res = await fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=space&type=movie&page=${infinitePage}`);
+      
+      const size = res.headers.get('content-length');
+      if (size) {
+        setInfiniteDataBytes(prev => prev + parseInt(size, 10));
+      }
 
-   console.log("Data in component state:", data);
-   console.log(typeof data);
+      const data = await res.json();
+      
+      if (data.Search && data.Search.length > 0) {
+        setInfiniteMovies(prev => [...prev, ...data.Search]);
+        setInfinitePage(prev => prev + 1);
+      } else {
+        setInfiniteHasMore(false);
+      }
+    } catch (err) {
+      console.error("Infinite stream connection dropped:", err);
+    } finally {
+      setIsInfiniteLoading(false);
+    }
+  };
+
+  // Wire up Intersection Observer Hook
+  useEffect(() => {
+    if (!infiniteHasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          console.log("🎯 Bottom anchor in view! Streaming next page segment...");
+          handleInfiniteFetch();
+        }
+      },
+      {
+        // Fixed: Target container ID now matches the element ID in JSX exactly
+        root: document.getElementById('infinite-scroll-container'), 
+        threshold: 0.1 
+      }
+    );
+
+    const currentTarget = bottomObserverRef.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [infinitePage, infiniteHasMore, isInfiniteLoading]);
+
+  // Format bytes helper
+  const toMB = (bytes) => (bytes / (1024 * 1024)).toFixed(3);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
       <div className='h-10 flex gap-2 justify-center text-white font-bold text-lg'>part2</div>
+      
       {/* 🧭 Minimal Navbar */}
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-6">
-          {/* Logo */}
           <span className="text-red-600 font-black text-2xl tracking-tighter cursor-pointer select-none">
             NETFLIX
           </span>
-          {/* Simple Navigation Links */}
           <div className="hidden sm:flex items-center gap-4 text-xs font-medium text-slate-400">
             <span className="text-slate-100 cursor-pointer transition-colors">Home</span>
             <span className="hover:text-slate-100 cursor-pointer transition-colors">TV Shows</span>
@@ -49,9 +91,9 @@ export default function NetflixMinimal() {
           </div>
         </div>
         
-        {/* User Profile Frame Placement */}
-        <div className="w-10     h-10    rounded bg-gradient-to-tr from-slate-700 to-slate-800 border border-slate-700 shadow cursor-pointer" >
-        <img src={img} alt="User Profile" className="w-10 h-10    border border-slate-700 shadow cursor-pointer" /></div>
+        <div className="w-10 h-10 rounded bg-gradient-to-tr from-slate-700 to-slate-800 border border-slate-700 shadow cursor-pointer overflow-hidden" >
+          <img src={img} alt="User Profile" className="w-full h-full object-cover" />
+        </div>
       </nav>
 
       {/* 🎬 Hero Spot Frame */}
@@ -65,7 +107,6 @@ export default function NetflixMinimal() {
             An unoptimized database query threatens to crash the production server. One engineer stands between a clean merge request and total thread pool collapse.
           </p>
           
-          {/* Action Buttons */}
           <div className="flex gap-3 mt-6">
             <button className="bg-white hover:bg-slate-200 text-slate-950 font-bold px-5 py-2 rounded text-xs transition-all shadow">
               ▶ Play Stream
@@ -85,32 +126,55 @@ export default function NetflixMinimal() {
           </h3>
         </div>
 
-        {/* Responsive Grid Structure */}
-        <div className="grid grid-cols-2  lg:grid-cols-3 gap-4">
-          {data.map((card) => (
+        {/* Responsive Grid Shell Layout */}
+        <div className="flex flex-col bg-slate-950 rounded-xl overflow-hidden border border-slate-900 p-4">
+          <div className="mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800/60 flex justify-between items-center">
+            <h3 className="text-xs font-bold tracking-wider text-emerald-400 uppercase">Netflix Streamer</h3>
+            <p className="text-[10px] text-slate-500 font-mono font-bold">On-Demand Cost: {toMB(infiniteDataBytes)} MB</p>
+          </div>
+
+          {/* Clean Scrolling Grid for Infinite Cards */}
+          <div 
+            id="infinite-scroll-container" 
+            className="overflow-y-auto max-h-[70vh] pr-1 grid grid-cols-2 lg:grid-cols-3 gap-4 content-start"
+          >
+            {infiniteMovies.map((card, idx) => (
+              <div 
+                key={`${card.imdbID}-${idx}`} 
+                className="group bg-slate-900 border border-slate-800/80 rounded-lg overflow-hidden shadow-md hover:border-slate-700 transition-all cursor-pointer flex flex-col h-fit"
+              >
+                <div className="aspect-[2/3] bg-gradient-to-br from-slate-800 to-slate-900 border-b border-slate-800 flex items-center justify-center p-4">
+                  <img src={card.Poster} alt={card.Title} className="w-full h-full object-cover rounded" />
+                </div>
+                <div className="p-3 flex-1 flex flex-col justify-between">
+                  <h4 className="font-bold text-xs text-slate-200 line-clamp-1 group-hover:text-red-500 transition-colors">
+                    {card.Title}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 font-mono mt-1">
+                    {card.Year} | {card.Type}
+                  </p>
+                </div>
+              </div>
+            ))}
+            
+            {/* 🎯 Target Viewport Anchor Block */}
             <div 
-              key={card.id} 
-              className="group bg-slate-900 border border-slate-800/80 rounded-lg overflow-hidden shadow-md hover:border-slate-700 transition-all cursor-pointer flex flex-col"
+              ref={bottomObserverRef} 
+              className="col-span-2 lg:col-span-3 h-14 flex items-center justify-center text-xs font-mono text-slate-500 font-bold pt-2"
             >
-              {/* Asset Poster Shell */}
-              <div className="aspect-[2/3] bg-gradient-to-br from-slate-800 to-slate-900 border-b border-slate-800 flex items-center justify-center p-4">
-                <img src={card.Poster} alt={card.title} className="w-full h-full object-cover rounded" />
-              </div>
-              
-              {/* Details Pane */}
-              <div className="p-3 flex-1 flex flex-col justify-between">
-                <h4 className="font-bold text-xs text-slate-200 line-clamp-1 group-hover:text-red-500 transition-colors">
-                  {card.Title}
-                </h4>
-                <p className="text-[10px] text-slate-500 font-mono mt-1">
-                  {card.Year} | {card.Type}
-                </p>
-              </div>
+              {infiniteHasMore ? (
+                <span className="animate-pulse flex items-center gap-1.5 text-slate-600 text-[10px]">
+                  ⏳ Observer scanning viewport window...
+                </span>
+              ) : (
+                <span className="text-emerald-500 text-[10px] bg-emerald-950/30 border border-emerald-900/40 px-3 py-1 rounded-full">
+                  🏁 Content pipeline completely drained.
+                </span>
+              )}
             </div>
-          ))}
+          </div>
         </div>
       </main>
-
     </div>
   );
 }
