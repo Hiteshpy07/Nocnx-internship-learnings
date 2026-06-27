@@ -11,10 +11,15 @@ export default function Netflixloadbulk() {
   const [bulkdata, setbulkData] = useState([]);
   const [bulkDataBytes, setBulkDataBytes] = useState(0); 
   const [showJioAlert, setShowJioAlert] = useState(false);   
+  const [loadingTime, setLoadingTime] = useState(0);
 
    useEffect(() => {
+    const startTime = performance.now();
     axios.get("http://localhost:8000/movies/bulk")
       .then(response => {
+        const endTime = performance.now();
+        const duration = endTime - startTime; 
+    setLoadingTime(Math.round(duration));
         const sizeInBytes = response.headers['content-length'];
         if (sizeInBytes) {
       const bytesNum = parseInt(sizeInBytes, 10);
@@ -109,8 +114,13 @@ export default function Netflixloadbulk() {
     <div className="h-0.5 bg-red-600 animate-shrink-width" />
   </div>
 )}
-<div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>
-  <span>data spent:{bulkDataBytes}kb</span>
+<div className='h-10 flex gap-2 justify-center text- white font-bold text-md'>
+  <span className='mt-2.5'>data spent:{bulkDataBytes}kb</span>
+  <span className="flex items-center gap-1.5 font-mono tracking-wide">
+    load time: <span className={`${loadingTime > 400 ? 'text-amber-400' : 'text-emerald-400'} font-black`}>
+      {loadingTime} ms
+    </span>
+    </span>
 </div>
       {/* 🧭 Minimal Navbar */}
       <nav className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">

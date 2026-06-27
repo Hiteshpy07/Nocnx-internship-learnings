@@ -9,6 +9,7 @@ export default function NetflixMinimal() {
   const [infiniteDataBytes, setInfiniteDataBytes] = useState(0);
   const [isInfiniteLoading, setIsInfiniteLoading] = useState(false);
 const [bulkDataBytes, setBulkDataBytes] = useState(0);
+  const [loadingTime, setLoadingTime] = useState(0);
   const bottomObserverRef = useRef(null);
 
   // Core Data Fetch Routine
@@ -19,8 +20,12 @@ const [bulkDataBytes, setBulkDataBytes] = useState(0);
     const API_KEY = "bbc0cf70"; // Your active OMDb key
     
     try {
+      const startTime = performance.now();
       const res = await fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=space&type=movie&page=${infinitePage}`);
-      
+      const endTime = performance.now();
+
+      const duration = endTime - startTime; 
+    setLoadingTime(Math.round(duration));
       const size = res.headers.get('content-length');
       if (size) {
         setInfiniteDataBytes(prev => prev + parseInt(size, 10));
@@ -81,8 +86,13 @@ const [bulkDataBytes, setBulkDataBytes] = useState(0);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
-      <div className='h-10 flex gap-2 justify-center text- white font-bold text-lg'>
-  <span>data spent:{bulkDataBytes}kb</span>
+<div className='h-10 flex gap-2 justify-center text- white font-bold text-md'>
+  <span className='mt-2.5'>data spent:{bulkDataBytes}kb</span>
+  <span className="flex items-center gap-1.5 font-mono tracking-wide">
+    load time: <span className={`${loadingTime > 400 ? 'text-amber-400' : 'text-emerald-400'} font-black`}>
+      {loadingTime} ms
+    </span>
+    </span>
 </div>
       
       {/* 🧭 Minimal Navbar */}
